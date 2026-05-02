@@ -1,0 +1,30 @@
+# Surgical Forge Ignore Manifest
+
+# Python
+__pycache__/
+*.py[cod]
+*$py.class
+.venv/
+env/
+venv/
+ENV/
+
+# Data Staging (CRITICAL: Do not upload raw data)
+portal/public/staging/
+portal/public/exports/
+*.csv
+*.xlsx
+*.txt
+
+# Next.js / Node
+portal/node_modules/
+portal/.next/
+portal/out/
+portal/.env*
+portal/npm-debug.log*
+
+# OS / IDE
+.DS_Store
+.vscode/
+.idea/
+Thumbs.db
