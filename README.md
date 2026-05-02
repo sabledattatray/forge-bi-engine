@@ -1,6 +1,7 @@
-# Surgical Forge Professional v1.0 🛡️🚀
+# 🛰️ Surgical Forge (v1.5 Master)
+### Powered by the **Surgical AI-BI Agent** 🤖📊
 
-**Surgical Forge** is an elite, high-performance BI Analytics Engine designed for autonomous data auditing and high-fidelity visualization of massive datasets (tested up to 10M+ rows).
+**Surgical Forge** is an elite, high-performance BI Analytics Engine designed for autonomous data auditing and high-fidelity visualization of massive datasets (tested up to 10M+ rows). It features the **Surgical AI-BI Agent**, a conversational analytical engine that translates natural language into precision SQL for real-time data discovery.
 
 ## 🧬 Package Structure
 

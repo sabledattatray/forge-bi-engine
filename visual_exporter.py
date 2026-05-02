@@ -171,6 +171,25 @@ class VisualExporter:
                         {"".join([f'<div class="chart-card">{fig.to_html(full_html=False, include_plotlyjs=False, config={"responsive": True, "displayModeBar": False})}</div>' for fig in visual_figs])}
                     </div>
 
+                    {f'''
+                    <div class="summary-box" style="margin-top: 40px; border-top-color: #00f2ff;">
+                        <h2>🎯 SURGICAL INSIGHT</h2>
+                        <div style="overflow-x: auto; font-family: 'JetBrains Mono'; font-size: 0.9rem;">
+                            <table style="width: 100%; border-collapse: collapse; color: #fff;">
+                                <thead>
+                                    <tr style="background: rgba(0,242,255,0.1); border-bottom: 2px solid #00f2ff;">
+                                        {"".join([f'<th style="padding: 15px; text-align: left;">{col.upper()}</th>' for col in insights["custom"].columns])}
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    {"".join([f'<tr style="border-bottom: 1px solid rgba(255,255,255,0.05);">{"".join([f"<td style='padding: 15px;'>{row[col]}</td>" for col in insights["custom"].columns])}</tr>' for _, row in insights["custom"].iloc[:15].iterrows()])}
+                                </tbody>
+                            </table>
+                            {f'<div style="margin-top: 15px; font-size: 0.7rem; color: #555;">* Showing first 15 records of your custom inquiry.</div>' if len(insights["custom"]) > 15 else ''}
+                        </div>
+                    </div>
+                    ''' if 'custom' in insights and not insights['custom'].empty else ''}
+
                     <div class="summary-box">
                         {summary}
                     </div>

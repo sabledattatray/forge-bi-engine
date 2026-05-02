@@ -83,6 +83,21 @@ export default function ForgePortal() {
       });
       const data = await response.json();
       setChatMessages(prev => [...prev, { role: 'ai', text: data.reply }]);
+
+      // --- TRIGGER SURGICAL INQUIRY IF QUERY DETECTED ---
+      if (data.query && file) {
+        setProgress(prev => [...prev, `Autonomous Action: ${data.query.substring(0, 30)}...`]);
+        const queryResponse = await fetch('/api/forge', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ fileName: file.name, query: data.query }),
+        });
+        const queryData = await queryResponse.json();
+        if (queryResponse.ok) {
+          setResultUrl(queryData.url);
+          setProgress(prev => [...prev, 'Surgical Insight Integrated.']);
+        }
+      }
     } catch (err) {
       setChatMessages(prev => [...prev, { role: 'ai', text: 'Neural Link Interrupted.' }]);
     } finally {
@@ -215,7 +230,7 @@ export default function ForgePortal() {
              <div className="flex items-center justify-between mb-6">
                 <div className="flex items-center gap-2 text-[10px] font-black uppercase tracking-[0.3em] text-[#00f2ff]">
                   <Cpu className="w-3 h-3" />
-                  Neural Assistant
+                  Surgical AI-BI Agent
                 </div>
                 <span className="text-[9px] text-gray-600 font-mono uppercase tracking-widest">Direct Link: Established</span>
              </div>

@@ -8,39 +8,50 @@ const execPromise = promisify(exec);
 
 export async function POST(req: NextRequest) {
   try {
-    const formData = await req.formData();
-    const file = formData.get('file') as File;
+    let fileName = '';
+    let filePath = '';
+    let query = '';
+    let isQueryOnly = false;
 
-    if (!file) {
-      return NextResponse.json({ error: 'No file injected' }, { status: 400 });
+    // Handle either FormData (Upload) or JSON (Query)
+    const contentType = req.headers.get('content-type') || '';
+    
+    if (contentType.includes('application/json')) {
+      const body = await req.json();
+      fileName = body.fileName;
+      query = body.query;
+      isQueryOnly = true;
+      filePath = join(process.cwd(), 'public', 'staging', fileName);
+    } else {
+      const formData = await req.formData();
+      const file = formData.get('file') as File;
+      if (!file) return NextResponse.json({ error: 'No file injected' }, { status: 400 });
+      
+      fileName = file.name;
+      const bytes = await file.arrayBuffer();
+      const buffer = Buffer.from(bytes);
+      const uploadDir = join(process.cwd(), 'public', 'staging');
+      await mkdir(uploadDir, { recursive: true });
+      filePath = join(uploadDir, fileName);
+      await writeFile(filePath, buffer);
     }
 
-    const bytes = await file.arrayBuffer();
-    const buffer = Buffer.from(bytes);
-
-    // Setup Lab Staging Area
-    const uploadDir = join(process.cwd(), 'public', 'staging');
+    // Setup Export Area
     const exportDir = join(process.cwd(), 'public', 'exports');
-    
-    await mkdir(uploadDir, { recursive: true });
     await mkdir(exportDir, { recursive: true });
 
-    const filePath = join(uploadDir, file.name);
-    await writeFile(filePath, buffer);
-
-    // Trigger Surgical Engine (Relative to Package Root)
+    // Trigger Surgical Engine
     const pythonScript = join(process.cwd(), '..', 'main.py');
-    const command = `python "${pythonScript}" "${filePath}" --web --output_dir "${exportDir}"`;
+    let command = `python "${pythonScript}" "${filePath}" --web --output_dir "${exportDir}"`;
+    if (query) {
+      command += ` --query "${query.replace(/"/g, '\\"')}"`;
+    }
     
     console.log('[LAB] Executing:', command);
     const { stdout, stderr } = await execPromise(command);
     
-    if (stderr && !stderr.includes('UserWarning')) {
-      console.error('[LAB] Engine Error:', stderr);
-    }
-
-    const resultFileName = `${file.name.split('.')[0]}_dashboard.html`;
-    const resultUrl = `/exports/${resultFileName}`;
+    const resultFileName = `${fileName.split('.')[0]}_dashboard.html`;
+    const resultUrl = `/exports/${resultFileName}?t=${Date.now()}`; // Bust cache for live updates
 
     return NextResponse.json({ 
       success: true, 
